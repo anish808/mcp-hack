@@ -1,0 +1,19 @@
+// Prisma schema for traces
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Trace {
+  id          String   @id @default(uuid())
+  timestamp   DateTime @default(now())
+  task        String
+  context     Json
+  model_output String
+  metadata    Json
+}
