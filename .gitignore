@@ -1,0 +1,85 @@
+# Node.js/Express Backend
+backend/node_modules/
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+backend/dist/
+backend/build/
+backend/prisma/dev.db
+backend/prisma/dev.db-journal
+backend/logs/
+backend/*.log
+backend/npm-debug.log
+backend/yarn-error.log
+
+# React Frontend
+frontend/node_modules/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/build/
+frontend/dist/
+frontend/.cache/
+frontend/*.log
+frontend/npm-debug.log
+frontend/yarn-error.log
+
+# Python SDK
+sdk/python/__pycache__/
+sdk/python/*.pyc
+sdk/python/*.pyo
+sdk/python/*.pyd
+sdk/python/.Python
+sdk/python/build/
+sdk/python/dist/
+sdk/python/*.egg-info/
+sdk/python/.venv/
+sdk/python/venv/
+sdk/python/env/
+sdk/python/*.log
+
+# TypeScript SDK
+sdk/typescript/node_modules/
+sdk/typescript/dist/
+sdk/typescript/build/
+sdk/typescript/*.tsbuildinfo
+sdk/typescript/*.log
+
+# Docker
+compose.yml.bak
+*.dockerignore
+Dockerfile.local
+*.tar.gz
+
+# General
+.env
+.env.backup
+*.env
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+*.cache
+
+# Editor/IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Testing/Coverage
+coverage/
+*.lcov
+test-results/
+junit.xml
+
+# Build Artifacts
+dist/
+build/
+out/
+
