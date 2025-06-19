@@ -14,18 +14,6 @@ services:
     networks:
       - app-network
 
-  hello-world:
-    pull_policy: always
-    build:
-      context: ./examples/hello-world
-      dockerfile: Dockerfile
-    ports:
-      - "9000:9000"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - app-network
-
 volumes:
   postgres_data:
 
