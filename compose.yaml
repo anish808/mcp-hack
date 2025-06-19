@@ -15,7 +15,6 @@ services:
       - app-network
 
   hello-world:
-    image: mcp/inspector
     pull_policy: always
     build:
       context: ./examples/hello-world
