@@ -22,4 +22,4 @@ COPY --from=builder /app /app
 COPY --from=builder /bin/uv /bin/uv
 ENV PATH="/app/.venv/bin:$PATH"
 WORKDIR /app
-CMD ["uv", "run", "server.py"]
+CMD ["uv", "run", "mcp", "dev", "server.py"]
