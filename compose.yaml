@@ -21,8 +21,7 @@ services:
       context: ./examples/hello-world
       dockerfile: Dockerfile
     ports:
-      - "5173:5173"
-      - "3000:3000"
+      - "9000:9000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
