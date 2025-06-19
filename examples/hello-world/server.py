@@ -1,6 +1,6 @@
 import logging
 
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Hello World Server")
 
@@ -12,7 +12,6 @@ def add(a: int, b: int) -> int:
     """Add two numbers"""
     logger.debug("We are going to add two numbers now, this tool was called.")
     return a + b
-
 
 def main():
     mcp.run(transport='stdio')
