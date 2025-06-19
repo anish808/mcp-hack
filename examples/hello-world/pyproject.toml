@@ -1,0 +1,24 @@
+[project]
+name = "mcp-hello-world"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "markdownify>=0.13.1",
+    "mcp>=1.0.0",
+    "protego>=0.3.1",
+    "pydantic>=2.0.0",
+    "readabilipy>=0.2.0",
+    "requests>=2.32.3",
+]
+
+[project.scripts]
+mcp-hello-world = "mcp_hello_world:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []

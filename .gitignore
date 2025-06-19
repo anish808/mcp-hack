@@ -83,3 +83,6 @@ dist/
 build/
 out/
 
+__pycache__/
+*.pyc
+uv.lock
