@@ -2,7 +2,6 @@ import asyncio
 import logging
 
 from fastmcp import FastMCP
-from http.cookiejar import debug
 
 mcp = FastMCP("Demo 🚀")
 
