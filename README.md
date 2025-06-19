@@ -38,3 +38,11 @@ Open, vendor-agnostic observability and trust layer for Model Context Protocol (
 ## Extending
 - Add fields to the trace schema for rate limiting, tool filtering, auth, etc.
 - Add new endpoints or UI features as needed.
+
+---
+
+## Examples MCP Hello World
+
+run uv sync maybe if doesnt work
+
+open http://localhost:5173/#resources to test after docker compose up
