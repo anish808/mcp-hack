@@ -1,5 +1,4 @@
 import logging
-import argparse
 import sys
 import os
 
@@ -12,7 +11,6 @@ from mcp_observability import MCPObservability
 mcp = FastMCP("Hello World Server")
 
 # Initialize observability (point to your backend service)
-# Use environment variable for Docker, fallback to localhost for local development
 backend_url = os.getenv('BACKEND_URL', 'http://localhost:3001')
 obs = MCPObservability(api_url=backend_url)
 
@@ -27,7 +25,7 @@ def add(a: int, b: int) -> int:
     return a + b
 
 @mcp.tool()
-@obs.tool_observer("multiply_numbers")
+@obs.tool_observer("multiply_numbers") 
 def multiply(a: int, b: int) -> int:
     """Multiply two numbers"""
     logger.debug(f"Multiplying {a} * {b}")
@@ -48,29 +46,6 @@ def get_observability_metrics() -> dict:
     """Get current observability metrics for all tools"""
     return obs.get_metrics()
 
-def main():
-    parser = argparse.ArgumentParser(description="Hello World MCP Server")
-    parser.add_argument("--transport", choices=["stdio", "http"], default="stdio", 
-                       help="Transport protocol to use (default: stdio)")
-    parser.add_argument("--host", default="localhost", 
-                       help="Host for HTTP transport (default: localhost)")
-    parser.add_argument("--port", type=int, default=8000, 
-                       help="Port for HTTP transport (default: 8000)")
-    parser.add_argument("--metrics", action="store_true",
-                       help="Print metrics before starting server")
-    
-    args = parser.parse_args()
-    
-    if args.metrics:
-        obs.print_metrics()
-    
-    logger.info(f"Starting MCP server with {args.transport} transport")
-    
-    if args.transport == "http":
-        logger.info(f"HTTP server will be available at http://{args.host}:{args.port}")
-        mcp.run(transport='http')
-    else:
-        mcp.run(transport='stdio')
-
 if __name__ == "__main__":
-    main()
+    logger.info("Starting MCP server with HTTP transport")
+    mcp.run(transport='http') 

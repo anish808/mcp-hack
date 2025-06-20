@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # PostgreSQL Database
   postgres:
     image: postgres:latest
     environment:
@@ -13,6 +14,110 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mcp_observability"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # MCP Observability Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/mcp_observability"
+      PORT: 3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/traces"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Dashboard
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_API_URL: "http://localhost:3001"
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MCP Hello World Server (HTTP mode for testing)
+  mcp-server:
+    build:
+      context: .
+      dockerfile: ./examples/hello-world/Dockerfile
+    environment:
+      PYTHONPATH: "/app/sdk/python"
+      BACKEND_URL: "http://backend:3001"
+    ports:
+      - "8000:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+    volumes:
+      - ./examples/hello-world:/app/examples/hello-world
+      - ./sdk:/app/sdk
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Claude Desktop Configuration Helper
+  claude-config:
+    build:
+      context: .
+      dockerfile: ./examples/hello-world/Dockerfile
+    volumes:
+      - ./examples/hello-world:/app/examples/hello-world
+      - ./sdk:/app/sdk
+      - ~/.config:/root/.config  # Mount host config directory
+      - ~/.local:/root/.local    # Mount host local directory
+    environment:
+      PYTHONPATH: "/app/sdk/python"
+    networks:
+      - app-network
+    profiles:
+      - tools
+    command: |
+      sh -c "
+        echo '🔧 Configuring Claude Desktop for MCP Observability...'
+        python3 install_to_claude.py
+        echo '✅ Claude Desktop configuration complete!'
+        echo '📝 Please restart Claude Desktop to pick up the new configuration.'
+        echo '💡 You can now use Claude Desktop to call:'
+        echo '   - Add numbers: \"Add 15 and 25\"'
+        echo '   - Multiply: \"Multiply 7 by 9\"'
+        echo '   - Get metrics: \"Show me observability metrics\"'
+      "
 
 volumes:
   postgres_data:
