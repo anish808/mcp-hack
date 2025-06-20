@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Filter, RefreshCw, Clock, CheckCircle, XCircle, Wrench, Calendar, AlertTriangle } from 'lucide-react';
 import { fetchTraces } from '../api';
+import clsx from 'clsx';
 
 interface Trace {
   id: string;
@@ -16,27 +18,40 @@ interface Trace {
   };
 }
 
-function TraceList({ onSelect }: { onSelect: (trace: Trace) => void }) {
+interface TraceListProps {
+  onSelect: (trace: Trace) => void;
+}
+
+const filterOptions = [
+  { value: 'all', label: 'All Traces', color: 'text-gray-600' },
+  { value: 'success', label: 'Success', color: 'text-success-600' },
+  { value: 'error', label: 'Errors', color: 'text-danger-600' },
+];
+
+function TraceList({ onSelect }: TraceListProps) {
   const [traces, setTraces] = useState<Trace[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadTraces = async (showRefreshing = false) => {
+    try {
+      if (showRefreshing) setRefreshing(true);
+      const data = await fetchTraces();
+      setTraces(data);
+    } catch (error) {
+      console.error('Failed to fetch traces:', error);
+    } finally {
+      setLoading(false);
+      if (showRefreshing) setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const loadTraces = async () => {
-      try {
-        const data = await fetchTraces();
-        setTraces(data);
-      } catch (error) {
-        console.error('Failed to fetch traces:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadTraces();
     
     // Refresh every 5 seconds
-    const interval = setInterval(loadTraces, 5000);
+    const interval = setInterval(() => loadTraces(), 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -46,136 +61,160 @@ function TraceList({ onSelect }: { onSelect: (trace: Trace) => void }) {
     return true;
   });
 
-  if (loading) return (
-    <div style={{ padding: '16px', textAlign: 'center' }}>
-      <div>Loading traces...</div>
-    </div>
-  );
+  const handleRefresh = () => {
+    loadTraces(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading traces...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div style={{ padding: '16px', borderBottom: '1px solid #eee' }}>
-        <h2 style={{ margin: '0 0 12px 0' }}>Traces ({filteredTraces.length})</h2>
+      <div className="p-6 border-b border-gray-200 bg-white">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Traces</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {filteredTraces.length} of {traces.length} traces
+            </p>
+          </div>
+          
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <RefreshCw className={clsx('w-4 h-4', refreshing && 'animate-spin')} />
+            <span>Refresh</span>
+          </button>
+        </div>
         
         {/* Filter buttons */}
-        <div style={{ display: 'flex', gap: '4px' }}>
-          {['all', 'success', 'error'].map(filterType => (
-            <button
-              key={filterType}
-              style={{
-                padding: '4px 8px',
-                border: '1px solid #dee2e6',
-                background: filter === filterType ? '#007bff' : 'white',
-                color: filter === filterType ? 'white' : '#333',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                textTransform: 'capitalize'
-              }}
-              onClick={() => setFilter(filterType)}
-            >
-              {filterType}
-            </button>
-          ))}
+        <div className="flex items-center space-x-2">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <div className="flex space-x-1">
+            {filterOptions.map(option => (
+              <button
+                key={option.value}
+                onClick={() => setFilter(option.value)}
+                className={clsx(
+                  'px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-200',
+                  filter === option.value
+                    ? 'bg-primary-100 text-primary-700 border border-primary-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Trace list */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '8px' }}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {filteredTraces.length === 0 ? (
-          <div style={{ textAlign: 'center', color: '#666', padding: '24px' }}>
-            No traces found
+          <div className="text-center py-12">
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Wrench className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-gray-500">No traces found</p>
+            <p className="text-sm text-gray-400 mt-1">
+              {filter !== 'all' ? `Try changing the filter or ` : ''}
+              traces will appear here as they're generated
+            </p>
           </div>
         ) : (
-          <div>
-            {filteredTraces.map(trace => {
-              const isSuccess = trace.metadata?.success !== false;
-              const executionTime = trace.metadata?.execution_time_ms;
-              const toolName = trace.metadata?.tool_name;
-              
-              return (
-                <div
-                  key={trace.id}
-                  style={{
-                    padding: '12px',
-                    margin: '4px 0',
-                    border: '1px solid #dee2e6',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    background: 'white',
-                    transition: 'all 0.2s',
-                    borderLeft: `4px solid ${isSuccess ? '#28a745' : '#dc3545'}`
-                  }}
-                  onClick={() => onSelect(trace)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                    e.currentTarget.style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                  }}
-                >
-                  {/* Header */}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <div style={{ fontWeight: 'bold', color: '#333', fontSize: '14px' }}>
+          filteredTraces.map(trace => {
+            const isSuccess = trace.metadata?.success !== false;
+            const executionTime = trace.metadata?.execution_time_ms;
+            const toolName = trace.metadata?.tool_name;
+            const hasError = trace.metadata?.error;
+            
+            return (
+              <div
+                key={trace.id}
+                onClick={() => onSelect(trace)}
+                className="card card-hover cursor-pointer group"
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-gray-900 truncate group-hover:text-primary-600 transition-colors">
                       {trace.task}
-                    </div>
-                    <div style={{ 
-                      fontSize: '12px', 
-                      color: isSuccess ? '#28a745' : '#dc3545',
-                      fontWeight: 'bold'
-                    }}>
-                      {isSuccess ? '✅' : '❌'}
+                    </h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <Calendar className="w-3 h-3 text-gray-400" />
+                      <span className="text-xs text-gray-500">
+                        {new Date(trace.timestamp).toLocaleString()}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Tool name */}
-                  {toolName && (
-                    <div style={{ 
-                      fontSize: '12px', 
-                      color: '#007bff', 
-                      background: '#e3f2fd',
-                      padding: '2px 6px',
-                      borderRadius: '12px',
-                      display: 'inline-block',
-                      marginBottom: '6px'
-                    }}>
-                      🔧 {toolName}
-                    </div>
-                  )}
-
-                  {/* Execution time */}
-                  {executionTime !== undefined && (
-                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '6px' }}>
-                      ⏱️ {executionTime.toFixed(1)}ms
-                    </div>
-                  )}
-
-                  {/* Timestamp */}
-                  <div style={{ fontSize: '11px', color: '#888' }}>
-                    📅 {new Date(trace.timestamp).toLocaleString()}
+                  
+                  <div className="flex items-center space-x-2">
+                    {isSuccess ? (
+                      <CheckCircle className="w-5 h-5 text-success-500" />
+                    ) : (
+                      <XCircle className="w-5 h-5 text-danger-500" />
+                    )}
                   </div>
-
-                  {/* Error info */}
-                  {!isSuccess && trace.metadata?.error && (
-                    <div style={{ 
-                      fontSize: '11px', 
-                      color: '#dc3545', 
-                      marginTop: '6px',
-                      padding: '4px 6px',
-                      background: '#f8d7da',
-                      borderRadius: '4px',
-                      border: '1px solid #f5c6cb'
-                    }}>
-                      ⚠️ {trace.metadata.error.substring(0, 50)}...
-                    </div>
-                  )}
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Metadata */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    {/* Tool name */}
+                    {toolName && (
+                      <div className="flex items-center space-x-1 bg-primary-50 text-primary-700 px-2 py-1 rounded-md text-xs font-medium">
+                        <Wrench className="w-3 h-3" />
+                        <span>{toolName}</span>
+                      </div>
+                    )}
+                    
+                    {/* Execution time */}
+                    {executionTime !== undefined && (
+                      <div className="flex items-center space-x-1 text-gray-500 text-xs">
+                        <Clock className="w-3 h-3" />
+                        <span>{executionTime.toFixed(1)}ms</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Status indicator */}
+                  <div className={clsx(
+                    'px-2 py-1 rounded-full text-xs font-medium',
+                    isSuccess
+                      ? 'bg-success-100 text-success-700'
+                      : 'bg-danger-100 text-danger-700'
+                  )}>
+                    {isSuccess ? 'Success' : 'Error'}
+                  </div>
+                </div>
+
+                {/* Error preview */}
+                {hasError && (
+                  <div className="mt-3 p-2 bg-danger-50 border border-danger-200 rounded-md">
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangle className="w-4 h-4 text-danger-500 flex-shrink-0" />
+                      <p className="text-xs text-danger-700 truncate">
+                        {trace.metadata?.error?.substring(0, 80)}
+                        {trace.metadata?.error && trace.metadata.error.length > 80 && '...'}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { BarChart3, TrendingUp, Clock, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { fetchTraces } from '../api';
+import clsx from 'clsx';
 
 interface Metrics {
   totalTraces: number;
@@ -9,6 +12,8 @@ interface Metrics {
   errorCount: number;
   toolStats: { [key: string]: { count: number; avgTime: number; errors: number } };
 }
+
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 function MetricsDashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
@@ -79,99 +84,271 @@ function MetricsDashboard() {
 
   if (loading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <div>Loading metrics...</div>
+      <div className="h-full flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading metrics...</p>
+        </div>
       </div>
     );
   }
 
   if (!metrics) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <div>Failed to load metrics</div>
+      <div className="h-full flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-gray-500">Failed to load metrics</p>
+        </div>
       </div>
     );
   }
 
-  const cardStyle = {
-    background: 'white',
-    border: '1px solid #dee2e6',
-    borderRadius: '8px',
-    padding: '24px',
-    margin: '16px',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-  };
+  // Prepare chart data
+  const toolChartData = Object.entries(metrics.toolStats).map(([name, stats]) => ({
+    name: name.length > 15 ? name.substring(0, 15) + '...' : name,
+    calls: stats.count,
+    avgTime: parseFloat(stats.avgTime.toFixed(1)),
+    errors: stats.errors
+  }));
 
-  const statCardStyle = {
-    ...cardStyle,
-    textAlign: 'center' as const,
-    minWidth: '200px'
-  };
+  const pieChartData = [
+    { name: 'Success', value: metrics.totalTraces - metrics.errorCount, color: '#10b981' },
+    { name: 'Errors', value: metrics.errorCount, color: '#ef4444' }
+  ];
 
   return (
-    <div style={{ padding: '24px', background: '#f8f9fa', minHeight: 'calc(100vh - 80px)' }}>
-      {/* Summary Cards */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '32px' }}>
-        <div style={statCardStyle}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#007bff' }}>Total Traces</h3>
-          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>{metrics.totalTraces}</div>
-        </div>
-        
-        <div style={statCardStyle}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#28a745' }}>Success Rate</h3>
-          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>
-            {metrics.successRate.toFixed(1)}%
+    <div className="h-full bg-gray-50 overflow-y-auto">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-br from-success-500 to-success-700 rounded-lg flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-white" />
           </div>
-        </div>
-        
-        <div style={statCardStyle}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#17a2b8' }}>Total Tools</h3>
-          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>{metrics.totalTools}</div>
-        </div>
-        
-        <div style={statCardStyle}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#ffc107' }}>Avg Time</h3>
-          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>
-            {metrics.avgExecutionTime.toFixed(0)}ms
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Performance Metrics</h1>
+            <p className="text-sm text-gray-500">Real-time system performance overview</p>
           </div>
-        </div>
-        
-        <div style={statCardStyle}>
-          <h3 style={{ margin: '0 0 16px 0', color: '#dc3545' }}>Errors</h3>
-          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>{metrics.errorCount}</div>
         </div>
       </div>
 
-      {/* Tool Statistics */}
-      <div style={cardStyle}>
-        <h2 style={{ marginTop: 0, color: '#333' }}>Tool Performance</h2>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#f8f9fa' }}>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '2px solid #dee2e6' }}>Tool Name</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #dee2e6' }}>Calls</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #dee2e6' }}>Avg Time (ms)</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #dee2e6' }}>Errors</th>
-                <th style={{ padding: '12px', textAlign: 'right', borderBottom: '2px solid #dee2e6' }}>Success Rate</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(metrics.toolStats).map(([toolName, stats]) => (
-                <tr key={toolName} style={{ borderBottom: '1px solid #dee2e6' }}>
-                  <td style={{ padding: '12px', fontWeight: 'bold' }}>{toolName}</td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>{stats.count}</td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>{stats.avgTime.toFixed(1)}</td>
-                  <td style={{ padding: '12px', textAlign: 'right', color: stats.errors > 0 ? '#dc3545' : '#28a745' }}>
-                    {stats.errors}
-                  </td>
-                  <td style={{ padding: '12px', textAlign: 'right' }}>
-                    {((stats.count - stats.errors) / stats.count * 100).toFixed(1)}%
-                  </td>
-                </tr>
+      <div className="p-6 space-y-6">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <Activity className="w-8 h-8 text-primary-600" />
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalTraces}</div>
+            </div>
+            <div className="metric-label">Total Traces</div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <CheckCircle className="w-8 h-8 text-success-600" />
+              <div className="text-2xl font-bold text-gray-900">{metrics.successRate.toFixed(1)}%</div>
+            </div>
+            <div className="metric-label">Success Rate</div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <BarChart3 className="w-8 h-8 text-blue-600" />
+              <div className="text-2xl font-bold text-gray-900">{metrics.totalTools}</div>
+            </div>
+            <div className="metric-label">Total Tools</div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <Clock className="w-8 h-8 text-warning-600" />
+              <div className="text-2xl font-bold text-gray-900">{metrics.avgExecutionTime.toFixed(0)}ms</div>
+            </div>
+            <div className="metric-label">Avg Response Time</div>
+          </div>
+          
+          <div className="metric-card">
+            <div className="flex items-center justify-between mb-4">
+              <AlertTriangle className="w-8 h-8 text-danger-600" />
+              <div className="text-2xl font-bold text-gray-900">{metrics.errorCount}</div>
+            </div>
+            <div className="metric-label">Total Errors</div>
+          </div>
+        </div>
+
+        {/* Charts Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Success/Error Distribution */}
+          <div className="card">
+            <div className="flex items-center space-x-2 mb-6">
+              <TrendingUp className="w-5 h-5 text-success-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Success Distribution</h2>
+            </div>
+            
+            <div className="flex items-center justify-center h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number) => [`${value} traces`, 'Count']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            
+            <div className="flex justify-center space-x-6 mt-4">
+              {pieChartData.map((entry, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: entry.color }}
+                  ></div>
+                  <span className="text-sm text-gray-600">{entry.name}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Tool Performance Chart */}
+          <div className="card">
+            <div className="flex items-center space-x-2 mb-6">
+              <BarChart3 className="w-5 h-5 text-primary-600" />
+              <h2 className="text-lg font-semibold text-gray-900">Tool Performance</h2>
+            </div>
+            
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={toolChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="name" 
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    fontSize={12}
+                  />
+                  <YAxis />
+                  <Tooltip 
+                    formatter={(value: number, name: string) => [
+                      name === 'calls' ? `${value} calls` : `${value}ms`,
+                      name === 'calls' ? 'Total Calls' : 'Avg Time'
+                    ]}
+                  />
+                  <Bar dataKey="calls" fill="#3b82f6" name="calls" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Tool Statistics Table */}
+        <div className="card">
+          <div className="flex items-center space-x-2 mb-6">
+            <BarChart3 className="w-5 h-5 text-gray-600" />
+            <h2 className="text-lg font-semibold text-gray-900">Detailed Tool Statistics</h2>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Tool Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total Calls
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Avg Time (ms)
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Errors
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Success Rate
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {Object.entries(metrics.toolStats).map(([toolName, stats]) => {
+                  const successRate = ((stats.count - stats.errors) / stats.count * 100);
+                  const isHealthy = successRate >= 95 && stats.avgTime < 1000;
+                  
+                  return (
+                    <tr key={toolName} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{toolName}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {stats.count}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <span className={clsx(
+                          'px-2 py-1 rounded-md text-xs font-medium',
+                          stats.avgTime < 100 ? 'bg-success-100 text-success-800' :
+                          stats.avgTime < 500 ? 'bg-warning-100 text-warning-800' :
+                          'bg-danger-100 text-danger-800'
+                        )}>
+                          {stats.avgTime.toFixed(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={clsx(
+                          'font-medium',
+                          stats.errors > 0 ? 'text-danger-600' : 'text-success-600'
+                        )}>
+                          {stats.errors}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="flex items-center">
+                          <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
+                            <div
+                              className={clsx(
+                                'h-2 rounded-full',
+                                successRate >= 95 ? 'bg-success-500' :
+                                successRate >= 80 ? 'bg-warning-500' :
+                                'bg-danger-500'
+                              )}
+                              style={{ width: `${successRate}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium">
+                            {successRate.toFixed(1)}%
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={clsx(
+                          'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                          isHealthy 
+                            ? 'bg-success-100 text-success-800' 
+                            : 'bg-warning-100 text-warning-800'
+                        )}>
+                          {isHealthy ? 'Healthy' : 'Needs Attention'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

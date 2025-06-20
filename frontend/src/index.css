@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
+  html {
+    @apply antialiased;
+  }
+  
+  body {
+    @apply font-sans text-gray-900 bg-gray-50;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl shadow-soft border border-gray-100 p-6;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-medium hover:-translate-y-0.5;
+  }
+  
+  .metric-card {
+    @apply card text-center min-w-[200px];
+  }
+  
+  .metric-value {
+    @apply text-3xl font-bold text-gray-900 mb-2;
+  }
+  
+  .metric-label {
+    @apply text-sm font-medium text-gray-600 uppercase tracking-wide;
+  }
+  
+  .status-success {
+    @apply text-success-600 bg-success-50 border-success-200;
+  }
+  
+  .status-error {
+    @apply text-danger-600 bg-danger-50 border-danger-200;
+  }
+  
+  .status-warning {
+    @apply text-warning-600 bg-warning-50 border-warning-200;
+  }
+  
+  .tab-active {
+    @apply bg-primary-600 text-white shadow-md;
+  }
+  
+  .tab-inactive {
+    @apply bg-white text-gray-700 hover:bg-gray-50 hover:text-gray-900;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .code-block {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto;
+  }
+  
+  .loading-pulse {
+    @apply animate-pulse-slow;
+  }
+} 
