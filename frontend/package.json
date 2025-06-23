@@ -10,11 +10,13 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.32.0",
+    "@types/react-router-dom": "^5.3.3",
     "axios": "^1.4.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^7.6.2",
     "recharts": "^2.8.0",
     "uuid": "^9.0.0"
   },
