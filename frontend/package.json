@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "rm -rf node_modules/.vite && rm -rf dist",
+    "dev:clean": "npm run clean && vite"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.32.0",

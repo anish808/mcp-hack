@@ -7,10 +7,16 @@ export default defineConfig({
   server: {
     port: 5173,
     host: '0.0.0.0',
-    open: false
+    open: false,
+    fs: {
+      strict: false
+    }
   },
   build: {
     outDir: 'dist',
     sourcemap: true
+  },
+  optimizeDeps: {
+    force: true
   }
 }) 
