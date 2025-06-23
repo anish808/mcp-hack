@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Zap, TrendingUp, Clock, AlertTriangle, CheckCircle, XCircle, Activity, BarChart3 } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { fetchTraces } from '../api';
+import { useAuth } from '@clerk/clerk-react';
 import clsx from 'clsx';
 
 interface ToolMetrics {
@@ -20,11 +21,13 @@ function ToolAnalytics() {
   const [toolMetrics, setToolMetrics] = useState<ToolMetrics[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const calculateAnalytics = async () => {
       try {
-        const traces = await fetchTraces();
+        const token = await getToken();
+        const traces = await fetchTraces({}, token || undefined);
         
         const toolData: { [key: string]: any } = {};
 

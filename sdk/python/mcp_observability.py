@@ -10,17 +10,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 class MCPObservability:
-    def __init__(self, api_url: str):
+    def __init__(self, api_url: str, api_key: Optional[str] = None):
         self.api_url = api_url.rstrip('/')
+        self.api_key = api_key
         self.metrics = {
             'tool_calls': {},
             'total_calls': 0,
             'total_errors': 0
         }
         self._lock = threading.Lock()
+        
+        if not self.api_key:
+            logger.warning("No API key provided. Traces will not be sent to the backend.")
 
     def trace(self, task: str, context: Dict[str, Any], model_output: str, metadata: Optional[Dict[str, Any]] = None):
         """Send a trace to the observability backend"""
+        if not self.api_key:
+            logger.debug("No API key configured, skipping trace submission")
+            return None
+            
         trace_id = str(uuid.uuid4())
         payload = {
             'id': trace_id,
@@ -31,8 +39,13 @@ class MCPObservability:
             'metadata': metadata or {}
         }
         
+        headers = {
+            'Content-Type': 'application/json',
+            'X-API-Key': self.api_key
+        }
+        
         try:
-            resp = requests.post(f'{self.api_url}/traces', json=payload, timeout=5)
+            resp = requests.post(f'{self.api_url}/traces', json=payload, headers=headers, timeout=5)
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
@@ -185,7 +198,10 @@ class MCPObservability:
                         print(f"    - {error['error']} ({error['timestamp']})")
 
 # Example usage:
-# obs = MCPObservability(api_url='http://localhost:3001')
+# obs = MCPObservability(
+#     api_url='http://localhost:3001',
+#     api_key='mcp_your_api_key_here'  # Get this from your dashboard
+# )
 # 
 # @obs.tool_observer("add_numbers")
 # def add(a: int, b: int) -> int:

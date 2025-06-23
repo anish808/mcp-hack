@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, RefreshCw, Clock, CheckCircle, XCircle, Wrench, Calendar, AlertTriangle } from 'lucide-react';
+import { useAuth } from '@clerk/clerk-react';
 import { fetchTraces } from '../api';
 import clsx from 'clsx';
 
@@ -29,6 +30,7 @@ const filterOptions = [
 ];
 
 function TraceList({ onSelect }: TraceListProps) {
+  const { getToken } = useAuth();
   const [traces, setTraces] = useState<Trace[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -37,7 +39,8 @@ function TraceList({ onSelect }: TraceListProps) {
   const loadTraces = async (showRefreshing = false) => {
     try {
       if (showRefreshing) setRefreshing(true);
-      const data = await fetchTraces();
+      const token = await getToken();
+      const data = await fetchTraces({}, token || undefined);
       setTraces(data);
     } catch (error) {
       console.error('Failed to fetch traces:', error);

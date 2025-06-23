@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BarChart3, TrendingUp, Clock, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { fetchTraces } from '../api';
+import { useAuth } from '@clerk/clerk-react';
 import clsx from 'clsx';
 
 interface Metrics {
@@ -18,11 +19,13 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
 function MetricsDashboard() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const calculateMetrics = async () => {
       try {
-        const traces = await fetchTraces();
+        const token = await getToken();
+        const traces = await fetchTraces({}, token || undefined);
         
         const toolStats: { [key: string]: { count: number; totalTime: number; errors: number } } = {};
         let totalExecutionTime = 0;

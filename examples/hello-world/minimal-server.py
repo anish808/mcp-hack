@@ -9,4 +9,4 @@ def add(a: int, b: int) -> int:
 
 if __name__ == "__main__":
     print("Starting minimal MCP server...")
-    mcp.run(transport='http') 
+    mcp.run() 

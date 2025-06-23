@@ -5,6 +5,7 @@ import TraceList from './components/TraceList';
 import TraceDetail from './components/TraceDetail';
 import MetricsDashboard from './components/MetricsDashboard';
 import ToolAnalytics from './components/ToolAnalytics';
+import ApiKeyManager from './components/ApiKeyManager';
 
 interface Trace {
   id: string;
@@ -139,22 +140,8 @@ function App() {
       case 'api-keys':
         return (
           <div className="p-8">
-            <div className="max-w-4xl mx-auto">
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">API Keys</h2>
-                <p className="text-gray-600 mt-2">Manage your API keys for MCP tool observability integration.</p>
-              </div>
-              
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="text-center py-12">
-                  <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">API Key Management</h3>
-                  <p className="text-gray-600 mb-6">API key management will be available soon.</p>
-                  <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
-                    Create API Key
-                  </button>
-                </div>
-              </div>
+            <div className="max-w-6xl mx-auto">
+              <ApiKeyManager />
             </div>
           </div>
         );

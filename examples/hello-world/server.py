@@ -12,9 +12,16 @@ from mcp_observability import MCPObservability
 mcp = FastMCP("Hello World Server")
 
 # Initialize observability (point to your backend service)
-# Use environment variable for Docker, fallback to localhost for local development
+# Use environment variables for Docker, fallback to localhost for local development
 backend_url = os.getenv('BACKEND_URL', 'http://localhost:3001')
-obs = MCPObservability(api_url=backend_url)
+# api_key = os.getenv('MCP_API_KEY')  # Set this to your API key from the dashboard
+api_key = "mcp_e7bcfe4c07ffdfe5687cce6bf0abb63c82d8883a9decc4186cfa2da0dc7941bb"
+
+if not api_key:
+    logger.warning("MCP_API_KEY environment variable not set. Traces will not be sent to backend.")
+    logger.warning("Create an API key in the dashboard and set MCP_API_KEY environment variable.")
+
+obs = MCPObservability(api_url=backend_url, api_key=api_key)
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

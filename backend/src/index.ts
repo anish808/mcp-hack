@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import tracesRouter from './routes/traces';
+import apiKeysRouter from './routes/apikeys';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint
+// Health check endpoint (before Clerk middleware to allow unauthenticated access)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -26,6 +27,7 @@ app.use(ClerkExpressWithAuth());
 
 // Routes
 app.use('/traces', tracesRouter);
+app.use('/api-keys', apiKeysRouter);
 
 // User management routes
 app.get('/user', (req: any, res) => {

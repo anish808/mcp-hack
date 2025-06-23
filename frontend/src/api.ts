@@ -2,8 +2,16 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-export async function fetchTraces(params = {}) {
-  const res = await axios.get(`${API_URL}/traces`, { params });
+export async function fetchTraces(params = {}, token?: string) {
+  const headers: any = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  
+  const res = await axios.get(`${API_URL}/traces`, { 
+    params,
+    headers 
+  });
   return res.data;
 }
 
