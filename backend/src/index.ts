@@ -1,17 +1,43 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import tracesRouter from './routes/traces';
 
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+}));
+
 app.use(express.json());
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Apply Clerk middleware
+app.use(ClerkExpressWithAuth());
+
+// Routes
 app.use('/traces', tracesRouter);
+
+// User management routes
+app.get('/user', (req: any, res) => {
+  if (req.auth?.userId) {
+    res.json({ userId: req.auth.userId, authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`MCP Observability backend running on port ${PORT}`);
+  console.log(`🚀 MCP Observability SaaS backend running on port ${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/health`);
 });

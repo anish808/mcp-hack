@@ -9,11 +9,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Trace {
+model User {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  traces    Trace[]
+  apiKeys   ApiKey[]
+
+  @@map("users")
+}
+
+model ApiKey {
   id          String   @id @default(uuid())
-  timestamp   DateTime @default(now())
-  task        String
-  context     Json
+  key         String   @unique
+  name        String
+  description String?
+  userId      String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime?
+
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  traces Trace[]
+
+  @@map("api_keys")
+}
+
+model Trace {
+  id           String    @id @default(uuid())
+  timestamp    DateTime  @default(now())
+  task         String
+  context      Json
   model_output String
-  metadata    Json
+  metadata     Json
+  userId       String?
+  apiKeyId     String?
+
+  // Relations
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+
+  @@map("traces")
 }

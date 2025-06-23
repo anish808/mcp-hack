@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BarChart3, Activity, Zap, Menu, X } from 'lucide-react';
+import { BarChart3, Activity, Zap, Menu, X, LogOut, User, Key } from 'lucide-react';
+import { useAuth, useUser, SignIn, SignUp, UserButton } from '@clerk/clerk-react';
 import TraceList from './components/TraceList';
 import TraceDetail from './components/TraceDetail';
 import MetricsDashboard from './components/MetricsDashboard';
@@ -45,13 +46,78 @@ const tabs: TabConfig[] = [
     label: 'Analytics',
     icon: Zap,
     color: 'text-warning-600'
+  },
+  {
+    id: 'api-keys',
+    label: 'API Keys',
+    icon: Key,
+    color: 'text-purple-600'
   }
 ];
 
 function App() {
+  const { isLoaded, isSignedIn } = useAuth();
+  const { user } = useUser();
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null);
   const [activeTab, setActiveTab] = useState('traces');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+
+  // Show loading spinner while Clerk loads
+  if (!isLoaded) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show authentication screen if not signed in
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-purple-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900">MCP Observability</h1>
+            <p className="text-gray-600 mt-2">Monitor and analyze your MCP tool usage</p>
+          </div>
+          
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <div className="flex space-x-1 mb-6">
+              <button
+                onClick={() => setAuthMode('signin')}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                  authMode === 'signin' 
+                    ? 'bg-primary-600 text-white' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => setAuthMode('signup')}
+                className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                  authMode === 'signup' 
+                    ? 'bg-primary-600 text-white' 
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                Sign Up
+              </button>
+            </div>
+            
+            {authMode === 'signin' ? <SignIn /> : <SignUp />}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderContent = () => {
     switch (activeTab) {
@@ -70,6 +136,28 @@ function App() {
         return <MetricsDashboard />;
       case 'analytics':
         return <ToolAnalytics />;
+      case 'api-keys':
+        return (
+          <div className="p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900">API Keys</h2>
+                <p className="text-gray-600 mt-2">Manage your API keys for MCP tool observability integration.</p>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div className="text-center py-12">
+                  <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">API Key Management</h3>
+                  <p className="text-gray-600 mb-6">API key management will be available soon.</p>
+                  <button className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors">
+                    Create API Key
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
       default:
         return (
           <div className="p-8">
@@ -128,10 +216,30 @@ function App() {
           })}
         </nav>
 
-        {/* Status Indicator */}
-        <div className="hidden sm:flex items-center space-x-2">
-          <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-gray-600">Live</span>
+        {/* User Section */}
+        <div className="flex items-center space-x-4">
+          {/* Status Indicator */}
+          <div className="hidden sm:flex items-center space-x-2">
+            <div className="w-2 h-2 bg-success-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-600">Live</span>
+          </div>
+          
+          {/* User Info & Menu */}
+          <div className="flex items-center space-x-3">
+            <div className="hidden sm:block text-right">
+              <p className="text-sm font-medium text-gray-900">{user?.primaryEmailAddress?.emailAddress}</p>
+              <p className="text-xs text-gray-500">
+                {user?.firstName} {user?.lastName}
+              </p>
+            </div>
+            <UserButton 
+              appearance={{
+                elements: {
+                  avatarBox: "w-8 h-8"
+                }
+              }}
+            />
+          </div>
         </div>
       </header>
 

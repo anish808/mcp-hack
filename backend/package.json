@@ -9,6 +9,9 @@
     "prisma": "prisma"
   },
   "dependencies": {
+    "@clerk/backend": "^2.1.0",
+    "@clerk/clerk-sdk-node": "^4.13.23",
+    "@clerk/express": "^1.7.0",
     "@prisma/client": "^6.10.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
