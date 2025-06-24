@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: mcp_observability
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mcp_observability"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.production
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://user:password@db:5432/mcp_observability
+      CLERK_SECRET_KEY: sk_test_Q6Ju0qj0RBQBaOE36SUAWotKKyrXI34Gp0E4lq249K
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.ssl
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      VITE_API_URL: https://etalesystems.com/api
+      VITE_CLERK_PUBLISHABLE_KEY: pk_test_YW11c2VkLW1hY2F3LTI1LmNsZXJrLmFjY291bnRzLmRldiQ
+    volumes:
+      - ./ssl/fullchain.cer:/etc/ssl/certs/fullchain.cer:ro
+      - ./ssl/etalesystems.com.key:/etc/ssl/private/etalesystems.com.key:ro
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge 

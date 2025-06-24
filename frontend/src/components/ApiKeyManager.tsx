@@ -19,11 +19,13 @@ const ApiKeyManager: React.FC = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newKey, setNewKey] = useState({ name: '', description: '' });
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   const fetchApiKeys = async () => {
     try {
       const token = await getToken();
-      const response = await fetch('http://localhost:3001/api-keys', {
+      const response = await fetch(`${API_URL}/apikeys`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ const ApiKeyManager: React.FC = () => {
       const token = await getToken();
       console.log('Got token:', token ? 'Token received' : 'No token');
       
-      const response = await fetch('http://localhost:3001/api-keys', {
+      const response = await fetch(`${API_URL}/apikeys`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -85,7 +87,8 @@ const ApiKeyManager: React.FC = () => {
   const toggleApiKey = async (id: string, isActive: boolean) => {
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api-keys/${id}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/apikeys/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -110,7 +113,8 @@ const ApiKeyManager: React.FC = () => {
 
     try {
       const token = await getToken();
-      const response = await fetch(`http://localhost:3001/api-keys/${id}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_URL}/apikeys/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

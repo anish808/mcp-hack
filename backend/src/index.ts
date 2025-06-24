@@ -11,7 +11,14 @@ const app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:3000',
+    'http://137.184.85.124',
+    'https://137.184.85.124',
+    'https://etalesystems.com',
+    'https://www.etalesystems.com'
+  ],
   credentials: true,
 }));
 
@@ -27,7 +34,7 @@ app.use(ClerkExpressWithAuth());
 
 // Routes
 app.use('/traces', tracesRouter);
-app.use('/api-keys', apiKeysRouter);
+app.use('/apikeys', apiKeysRouter);
 
 // User management routes
 app.get('/user', (req: any, res) => {
