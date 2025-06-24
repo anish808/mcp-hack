@@ -49,14 +49,44 @@ router.post('/', async (req: any, res) => {
     }
 
     // Ensure user exists in database (create if not exists)
-    await prisma.user.upsert({
-      where: { id: userId },
-      update: {}, // Don't update anything if user exists
-      create: {
-        id: userId,
-        email: req.auth?.user?.primaryEmailAddress?.emailAddress || 'unknown@example.com'
-      }
+    const userEmail = req.auth?.user?.primaryEmailAddress?.emailAddress || `${userId}@clerk.local`;
+    
+    // First try to find existing user by ID
+    let user = await prisma.user.findUnique({
+      where: { id: userId }
     });
+    
+    // If user doesn't exist, create them
+    if (!user) {
+      try {
+        user = await prisma.user.create({
+          data: {
+            id: userId,
+            email: userEmail
+          }
+        });
+      } catch (error: any) {
+        // If email already exists with different ID, try to find by email
+        if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+          // Check if there's already a user with this email but different Clerk ID
+          const existingEmailUser = await prisma.user.findUnique({
+            where: { email: userEmail }
+          });
+          
+          if (existingEmailUser) {
+            // Update the existing user with the new Clerk ID
+            user = await prisma.user.update({
+              where: { email: userEmail },
+              data: { id: userId }
+            });
+          } else {
+            throw error; // Re-throw if it's a different constraint error
+          }
+        } else {
+          throw error; // Re-throw if it's not an email constraint error
+        }
+      }
+    }
 
     // Generate a secure API key
     const apiKey = `mcp_${crypto.randomBytes(32).toString('hex')}`;
