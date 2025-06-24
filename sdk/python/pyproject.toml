@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mcp-observability"
+version = "0.1.1"
+description = "Open, vendor-agnostic observability SDK for Model Context Protocol (MCP) applications"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+    { name = "MCP Observability Team", email = "team@mcp-observability.com" },
+]
+keywords = ["mcp", "observability", "llm", "ai", "monitoring", "tracing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "requests>=2.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov",
+    "black",
+    "isort",
+    "flake8",
+    "mypy",
+    "types-requests",
+]
+
+[project.urls]
+Homepage = "https://github.com/anish808/mcp-hack"
+Documentation = "https://github.com/anish808/mcp-hack#readme"
+Repository = "https://github.com/anish808/mcp-hack.git"
+"Bug Tracker" = "https://github.com/anish808/mcp-hack/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_observability"]
+exclude = [
+    "*env*",
+    "*.bak",
+    "dist/",
+    "build/",
+    "*.egg-info/",
+    ".git/",
+    "__pycache__/",
+    "*.pyc"
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true 

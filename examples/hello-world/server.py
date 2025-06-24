@@ -1,10 +1,6 @@
 import logging
 import argparse
-import sys
 import os
-
-# Add parent directory to path to import our SDK
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'sdk', 'python'))
 
 from mcp.server.fastmcp import FastMCP
 from mcp_observability import MCPObservability
