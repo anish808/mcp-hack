@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mcp-observability"
-version = "0.1.1"
+version = "0.1.2"
 description = "Open, vendor-agnostic observability SDK for Model Context Protocol (MCP) applications"
 readme = "README.md"
 license = "MIT"
@@ -42,10 +42,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/anish808/mcp-hack"
+Homepage = "https://etalesystems.com"
 Documentation = "https://github.com/anish808/mcp-hack#readme"
 Repository = "https://github.com/anish808/mcp-hack.git"
 "Bug Tracker" = "https://github.com/anish808/mcp-hack/issues"
+Dashboard = "https://etalesystems.com"
 
 [tool.hatch.build.targets.wheel]
 packages = ["mcp_observability"]

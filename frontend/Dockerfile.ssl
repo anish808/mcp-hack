@@ -10,6 +10,14 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Accept build arguments for Vite environment variables
+ARG VITE_API_URL=https://etalesystems.com/api
+ARG VITE_CLERK_PUBLISHABLE_KEY=pk_test_YW11c2VkLW1hY2F3LTI1LmNsZXJrLmFjY291bnRzLmRldiQ
+
+# Set environment variables for the build
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
+
 # Build the application
 RUN npm run build
 

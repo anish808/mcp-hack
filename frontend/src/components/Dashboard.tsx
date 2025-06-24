@@ -90,7 +90,7 @@ const Dashboard: React.FC = () => {
       default:
         return (
           <div className="p-8">
-            <h2 className="text-2xl font-bold text-gray-900">Welcome to MCP Observability</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Welcome to Etale Systems</h2>
             <p className="text-gray-600 mt-2">Select a tab to get started.</p>
           </div>
         );
@@ -114,8 +114,8 @@ const Dashboard: React.FC = () => {
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">MCP Observability</h1>
-              <p className="text-sm text-gray-500">Real-time monitoring & analytics</p>
+              <h1 className="text-xl font-bold text-gray-900">Etale Systems</h1>
+              <p className="text-sm text-gray-500">MCP Observability Platform</p>
             </div>
           </a>
         </div>

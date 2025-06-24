@@ -1,8 +1,10 @@
-# MCP Observability Tool
+# MCP Observability Platform
 
 ## Overview
 
 Open, vendor-agnostic observability and trust layer for Model Context Protocol (MCP) LLM applications. No vendor lock-in, plug-and-play SDKs, and extensible for rate limiting, tool filtering, auth, and traceability.
+
+🚀 **Production Ready**: Available at [https://etalesystems.com](https://etalesystems.com)
 
 ## Features
 - Trace collection SDKs (Python, TypeScript)
@@ -12,18 +14,32 @@ Open, vendor-agnostic observability and trust layer for Model Context Protocol (
 
 ## Quickstart
 
-### 1. Backend
-- Install dependencies: `cd backend && npm install`
-- Set up Postgres and .env (see `.env.example`)
-- Run migrations: `npx prisma migrate dev`
-- Start server: `npm run dev`
+### Option 1: Use Production (Recommended)
 
-### 2. Frontend
-- Install dependencies: `cd frontend && npm install`
-- Start dev server: `npm start`
+1. **Get API Key**: Visit [https://etalesystems.com](https://etalesystems.com) and create an API key
+2. **Install SDK**: 
+   ```bash
+   # Python
+   pip install mcp-hack
+   
+   # TypeScript/JavaScript
+   npm install @mcp-hack/typescript
+   ```
+3. **Use in your code**: See [Python SDK](sdk/python/README.md) or [TypeScript SDK](sdk/typescript/README.md) documentation
 
-### 3. SDK Usage
-- See `sdk/python/mcp_observability.py` and `sdk/typescript/mcp-observability.ts` for usage examples.
+### Option 2: Local Development
+
+1. **Backend**: 
+   - `cd backend && npm install`
+   - Set up Postgres and .env (see `.env.example`)
+   - `npx prisma migrate dev`
+   - `npm run dev`
+
+2. **Frontend**: 
+   - `cd frontend && npm install`
+   - `npm start`
+
+3. **SDK Usage**: Point to `http://localhost:3001` instead of production URL
 
 ---
 
@@ -41,8 +57,17 @@ Open, vendor-agnostic observability and trust layer for Model Context Protocol (
 
 ---
 
-## Examples MCP Hello World
+## Examples
 
-run uv sync maybe if doesnt work
+See the [Hello World MCP Server](examples/hello-world/) example that demonstrates:
+- Basic MCP server with observability
+- Math tools (add, multiply, divide)
+- Real-time trace collection
+- Dashboard integration
 
-open http://localhost:5173/#resources to test after docker compose up
+## Links
+
+- 🌐 **Dashboard**: [https://etalesystems.com](https://etalesystems.com)
+- 📚 **Python SDK**: [PyPI](https://pypi.org/project/mcp-hack/)
+- 📚 **TypeScript SDK**: [NPM](https://www.npmjs.com/package/@mcp-hack/typescript)
+- 🐙 **Source Code**: [GitHub](https://github.com/anish808/mcp-hack)

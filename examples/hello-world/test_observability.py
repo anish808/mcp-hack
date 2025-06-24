@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__f
 from mcp_observability import MCPObservability
 
 # Initialize observability (in real usage, this would point to your backend)
-obs = MCPObservability(api_url='http://localhost:3001')
+obs = MCPObservability(api_url='https://etalesystems.com/api', api_key='mcp_25abf53b3ba1036df400b6eeca8a3f819583c97f13cce59ce781271f33b50576')
 
 # Define some test functions with observability
 @obs.tool_observer("add_function")

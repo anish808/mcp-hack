@@ -1,6 +1,6 @@
 {
   "name": "@mcp-hack/typescript",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open, vendor-agnostic observability SDK for Model Context Protocol (MCP) applications - TypeScript/JavaScript",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -38,7 +38,7 @@
     "url": "https://github.com/anish808/mcp-hack.git",
     "directory": "sdk/typescript"
   },
-  "homepage": "https://github.com/anish808/mcp-hack#readme",
+  "homepage": "https://etalesystems.com",
   "bugs": {
     "url": "https://github.com/anish808/mcp-hack/issues"
   },

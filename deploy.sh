@@ -105,20 +105,31 @@ echo "🚀 Deploying application..."
 ssh $SERVER_USER@$SERVER_IP << EOF
 cd $DEPLOY_DIR
 
+echo "🔐 Setting up SSL certificates..."
+# Ensure SSL certificates are available
+mkdir -p ssl
+if [ -f ~/.acme.sh/etalesystems.com_ecc/etalesystems.com.cer ] && [ -f ~/.acme.sh/etalesystems.com_ecc/etalesystems.com.key ]; then
+    cp ~/.acme.sh/etalesystems.com_ecc/etalesystems.com.cer ssl/fullchain.cer
+    cp ~/.acme.sh/etalesystems.com_ecc/etalesystems.com.key ssl/etalesystems.com.key
+    echo "✅ SSL certificates updated"
+else
+    echo "⚠️  SSL certificates not found in ~/.acme.sh/ - using existing certificates"
+fi
+
 echo "🔄 Stopping existing containers..."
-docker-compose -f compose.production.yaml down --remove-orphans || true
+docker-compose -f compose.production.ssl.yaml down --remove-orphans || true
 
 echo "🏗️  Building and starting new containers..."
-docker-compose -f compose.production.yaml --env-file .env.production up -d --build
+docker-compose -f compose.production.ssl.yaml --env-file .env.production up -d --build
 
 echo "⏳ Waiting for services to start..."
 sleep 30
 
 echo "🔍 Checking service status..."
-docker-compose -f compose.production.yaml ps
+docker-compose -f compose.production.ssl.yaml ps
 
 echo "📊 Checking logs..."
-docker-compose -f compose.production.yaml logs --tail=20
+docker-compose -f compose.production.ssl.yaml logs --tail=20
 
 echo "🔥 Setting up firewall rules..."
 ufw allow 80/tcp
@@ -127,12 +138,12 @@ ufw allow 3001/tcp
 ufw --force enable || true
 
 echo "✅ Deployment complete!"
-echo "🌐 Frontend available at: http://137.184.85.124"
-echo "📡 Backend API available at: http://137.184.85.124:3001"
+echo "🌐 Frontend available at: https://etalesystems.com"
+echo "📡 Backend API available at: https://etalesystems.com/api/"
 echo ""
-echo "🔧 To monitor logs: docker-compose -f compose.production.yaml logs -f"
-echo "🔄 To restart services: docker-compose -f compose.production.yaml restart"
-echo "🛑 To stop services: docker-compose -f compose.production.yaml down"
+echo "🔧 To monitor logs: docker-compose -f compose.production.ssl.yaml logs -f"
+echo "🔄 To restart services: docker-compose -f compose.production.ssl.yaml restart"
+echo "🛑 To stop services: docker-compose -f compose.production.ssl.yaml down"
 EOF
 
 # Cleanup
@@ -142,10 +153,10 @@ rm -rf $TEMP_DIR
 echo ""
 echo "🎉 Deployment completed successfully!"
 echo "🌐 Your application is now live at:"
-echo "   Frontend: http://137.184.85.124"
-echo "   Backend:  http://137.184.85.124:3001"
+echo "   Frontend: https://etalesystems.com"
+echo "   Backend:  https://etalesystems.com/api/"
 echo ""
 echo "💡 Next steps:"
 echo "   1. Test your application in a browser"
-echo "   2. Set up SSL certificates for HTTPS (optional)"
-echo "   3. Configure a domain name (optional)" 
+echo "   2. SSL certificates are already configured and working"
+echo "   3. Domain name is already configured" 

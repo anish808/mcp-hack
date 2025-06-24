@@ -12,13 +12,26 @@ yarn add @mcp-hack/typescript
 
 ## Quick Start
 
+### 1. Get an API Key
+
+1. Visit [https://etalesystems.com](https://etalesystems.com)
+2. Sign in with your Google account
+3. Create a new API key from the dashboard
+4. Set your API key as an environment variable:
+
+```bash
+export MCP_API_KEY="your_api_key_here"
+```
+
+### 2. Use in Your Code
+
 ```typescript
 import { trace } from '@mcp-hack/typescript';
 
 // Send a trace to your observability backend
 await trace({
-  apiUrl: 'http://localhost:3001',
-  apiKey: process.env.MCP_API_KEY!, // Get from your dashboard
+  apiUrl: 'https://etalesystems.com/api',
+  apiKey: process.env.MCP_API_KEY!, // Your API key from etalesystems.com
   task: 'Summarize',
   context: { userMessage: 'Summarize the last 5 emails' },
   modelOutput: 'Here is the summary...',
@@ -64,8 +77,8 @@ Promise that resolves to the response data or null if the request fails.
 import { trace } from '@mcp-hack/typescript';
 
 const result = await trace({
-  apiUrl: 'https://your-backend.com',
-  apiKey: 'mcp_your_api_key_here',
+  apiUrl: 'https://etalesystems.com/api',
+  apiKey: process.env.MCP_API_KEY!,
   task: 'Document Analysis',
   context: {
     documentId: '12345',
@@ -82,7 +95,7 @@ const result = await trace({
 
 ## Environment Variables
 
-- `MCP_API_KEY`: Your API key from the observability dashboard
+- `MCP_API_KEY`: Your API key from https://etalesystems.com
 
 ## TypeScript Support
 
@@ -114,4 +127,5 @@ Contributions are welcome! Please see our [Contributing Guide](https://github.co
 - [Documentation](https://github.com/anish808/mcp-hack#readme)
 - [GitHub Repository](https://github.com/anish808/mcp-hack)
 - [Issue Tracker](https://github.com/anish808/mcp-hack/issues)
-- [Python SDK](https://pypi.org/project/mcp-hack/) 
+- [Python SDK](https://pypi.org/project/mcp-hack/)
+- [Dashboard](https://etalesystems.com) - Generate API keys and view traces 

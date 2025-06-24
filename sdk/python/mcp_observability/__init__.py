@@ -6,6 +6,10 @@ import functools
 import threading
 from typing import Dict, Any, Callable, Optional
 import logging
+import urllib3
+
+# Disable SSL warnings when verify=False is used
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +49,7 @@ class MCPObservability:
         }
         
         try:
-            resp = requests.post(f'{self.api_url}/traces', json=payload, headers=headers, timeout=5)
+            resp = requests.post(f'{self.api_url}/traces', json=payload, headers=headers, timeout=5, verify=False)
             resp.raise_for_status()
             return resp.json()
         except Exception as e:

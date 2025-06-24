@@ -9,9 +9,8 @@ mcp = FastMCP("Hello World Server")
 
 # Initialize observability (point to your backend service)
 # Use environment variables for Docker, fallback to localhost for local development
-backend_url = os.getenv('BACKEND_URL', 'http://localhost:3001')
-# api_key = os.getenv('MCP_API_KEY')  # Set this to your API key from the dashboard
-api_key = "mcp_e7bcfe4c07ffdfe5687cce6bf0abb63c82d8883a9decc4186cfa2da0dc7941bb"
+backend_url = os.getenv('BACKEND_URL', 'https://etalesystems.com/api')
+api_key = os.getenv('MCP_API_KEY', 'mcp_25abf53b3ba1036df400b6eeca8a3f819583c97f13cce59ce781271f33b50576')  # Set this to your API key from the dashboard
 
 if not api_key:
     logger.warning("MCP_API_KEY environment variable not set. Traces will not be sent to backend.")

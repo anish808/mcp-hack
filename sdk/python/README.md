@@ -10,14 +10,27 @@ pip install mcp-hack
 
 ## Quick Start
 
+### 1. Get an API Key
+
+1. Visit [https://etalesystems.com](https://etalesystems.com)
+2. Sign in with your Google account
+3. Create a new API key from the dashboard
+4. Set your API key as an environment variable:
+
+```bash
+export MCP_API_KEY="your_api_key_here"
+```
+
+### 2. Use in Your Code
+
 ```python
 import os
 from mcp_observability import MCPObservability
 
 # Initialize observability
 obs = MCPObservability(
-    api_url="http://localhost:3001",  # Your backend URL
-    api_key=os.getenv('MCP_API_KEY')  # Get from your dashboard
+    api_url="https://etalesystems.com/api",  # Production backend URL
+    api_key=os.getenv('MCP_API_KEY')  # Your API key from etalesystems.com
 )
 
 # Add observability to your MCP tools
@@ -99,8 +112,8 @@ obs.print_metrics()
 
 ## Environment Variables
 
-- `MCP_API_KEY`: Your API key from the observability dashboard
-- `BACKEND_URL`: URL of your observability backend (default: http://localhost:3001)
+- `MCP_API_KEY`: Your API key from https://etalesystems.com
+- `BACKEND_URL`: URL of your observability backend (default: https://etalesystems.com/api)
 
 ## License
 
@@ -115,4 +128,4 @@ Contributions are welcome! Please see our [Contributing Guide](https://github.co
 - [Documentation](https://github.com/anish808/mcp-hack#readme)
 - [GitHub Repository](https://github.com/anish808/mcp-hack)
 - [Issue Tracker](https://github.com/anish808/mcp-hack/issues)
-- [Dashboard](http://localhost:5173) (when running locally) 
+- [Dashboard](https://etalesystems.com) - Generate API keys and view traces 

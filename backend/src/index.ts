@@ -24,6 +24,23 @@ app.use(cors({
 
 app.use(express.json());
 
+// API info endpoint (before Clerk middleware to allow unauthenticated access)
+app.get('/', (req, res) => {
+  res.json({ 
+    name: 'Etale Systems MCP Observability API',
+    version: '1.0.0',
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/health',
+      traces: '/traces',
+      apikeys: '/apikeys',
+      user: '/user'
+    },
+    documentation: 'https://etalesystems.com'
+  });
+});
+
 // Health check endpoint (before Clerk middleware to allow unauthenticated access)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
