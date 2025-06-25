@@ -57,6 +57,9 @@ Dockerfile.local
 .env
 .env.backup
 *.env
+.env.production
+.env.production.domain
+.env.production.template
 *.log
 .DS_Store
 Thumbs.db
