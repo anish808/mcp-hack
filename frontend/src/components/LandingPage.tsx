@@ -11,9 +11,11 @@ import {
   Star,
   Menu,
   X,
-  Play
+  Play,
+  Loader
 } from 'lucide-react';
 import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
+import { submitContactForm } from '../api';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -24,6 +26,50 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isSignedIn } = useAuth();
+  
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    interest: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email) {
+      setErrorMessage('Please fill in all required fields.');
+      setSubmitStatus('error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
+
+    try {
+      await submitContactForm(formData);
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', interest: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+      setErrorMessage('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const features = [
     {
@@ -265,19 +311,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   </p>
                 </div>
                 
-                <form 
-                  action="mailto:etalesystemsteam@gmail.com" 
-                  method="post" 
-                  encType="text/plain"
-                  className="space-y-4"
-                >
+                <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div>
                     <input
                       type="text"
                       name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       placeholder="Full Name"
+                      disabled={isSubmitting}
                     />
                   </div>
                   
@@ -285,16 +329,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     <input
                       type="email"
                       name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       placeholder="Email Address"
+                      disabled={isSubmitting}
                     />
                   </div>
                   
                   <div>
                     <select
                       name="interest"
+                      value={formData.interest}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      disabled={isSubmitting}
                     >
                       <option value="">What interests you most?</option>
                       <option value="typescript-sdk">TypeScript SDK Release</option>
@@ -305,11 +355,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     </select>
                   </div>
                   
+                  {submitStatus === 'error' && errorMessage && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-600 text-sm">{errorMessage}</p>
+                    </div>
+                  )}
+                  
+                  {submitStatus === 'success' && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-green-600 text-sm flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Thank you for your interest! We'll be in touch soon.
+                      </p>
+                    </div>
+                  )}
+                  
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
                   >
-                    Join Our Community
+                    {isSubmitting ? (
+                      <>
+                        <Loader className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Join Our Community'
+                    )}
                   </button>
                   
                   <p className="text-xs text-gray-500 text-center">

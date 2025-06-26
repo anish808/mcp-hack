@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { ClerkExpressWithAuth } from '@clerk/clerk-sdk-node';
 import tracesRouter from './routes/traces';
 import apiKeysRouter from './routes/apikeys';
+import contactRouter from './routes/contact';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/health',
+      contact: '/contact',
       traces: '/traces',
       apikeys: '/apikeys',
       user: '/user'
@@ -45,6 +47,9 @@ app.get('/', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Contact form endpoint (before Clerk middleware to allow unauthenticated access)
+app.use('/contact', contactRouter);
 
 // Apply Clerk middleware
 app.use(ClerkExpressWithAuth());

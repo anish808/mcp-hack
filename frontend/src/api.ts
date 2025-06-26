@@ -20,3 +20,12 @@ export async function replayTrace(trace) {
   // For now, just return the same trace with a new timestamp
   return { ...trace, id: undefined, timestamp: new Date().toISOString() };
 }
+
+export async function submitContactForm(formData: { name: string; email: string; interest: string }) {
+  const res = await axios.post(`${API_URL}/contact/contact`, formData, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return res.data;
+}
