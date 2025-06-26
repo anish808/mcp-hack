@@ -1,16 +1,10 @@
 import express from 'express';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const router = express.Router();
 
-// Email configuration
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'etalesystemsteam@gmail.com',
-    pass: process.env.EMAIL_APP_PASSWORD || '', // Use app password for Gmail
-  },
-});
+// Email configuration using Resend (bypasses SMTP restrictions)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post('/contact', async (req, res) => {
   try {
@@ -20,10 +14,21 @@ router.post('/contact', async (req, res) => {
       return res.status(400).json({ error: 'Name and email are required' });
     }
 
+    // Log the attempt for debugging
+    console.log('📧 Attempting to send contact form email:', { name, email, interest });
+    
+    // Check if email configuration is available
+    if (!process.env.RESEND_API_KEY) {
+      console.error('❌ Resend API key missing');
+      return res.status(500).json({ 
+        error: 'Email service not configured. Please try again later.' 
+      });
+    }
+
     // Email content
-    const mailOptions = {
-      from: process.env.EMAIL_USER || 'etalesystemsteam@gmail.com',
-      to: 'etalesystemsteam@gmail.com',
+    const emailData = {
+      from: 'Etale Systems <onboarding@resend.dev>',
+      to: ['etalesystemsteam@gmail.com'],
       subject: 'New Contact Form Submission - Etale Systems',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -70,7 +75,9 @@ Submitted at: ${new Date().toLocaleString()}
       `,
     };
 
-    await transporter.sendMail(mailOptions);
+    console.log('📤 Sending email via Resend...');
+    const result = await resend.emails.send(emailData);
+    console.log('✅ Email sent successfully:', result);
 
     res.status(200).json({ 
       success: true, 
@@ -78,10 +85,22 @@ Submitted at: ${new Date().toLocaleString()}
     });
 
   } catch (error) {
-    console.error('Error sending email:', error);
-    res.status(500).json({ 
-      error: 'Failed to send email. Please try again later.' 
-    });
+    console.error('❌ Error sending email:', error);
+    
+    // Provide more specific error messages
+    if (error.message?.includes('timeout')) {
+      res.status(504).json({ 
+        error: 'Email service timeout. Please try again later.' 
+      });
+    } else if (error.message?.includes('unauthorized') || error.message?.includes('invalid')) {
+      res.status(500).json({ 
+        error: 'Email authentication failed. Please try again later.' 
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to send email. Please try again later.' 
+      });
+    }
   }
 });
 

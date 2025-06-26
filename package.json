@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "axios": "^1.10.0",
+    "resend": "^4.6.0",
     "uuid": "^11.1.0"
   }
 }

@@ -25,6 +25,7 @@ services:
       DATABASE_URL: postgresql://user:password@db:5432/mcp_observability
       CLERK_SECRET_KEY: sk_test_Q6Ju0qj0RBQBaOE36SUAWotKKyrXI34Gp0E4lq249K
       NODE_ENV: production
+      RESEND_API_KEY: ${RESEND_API_KEY}
     depends_on:
       db:
         condition: service_healthy
