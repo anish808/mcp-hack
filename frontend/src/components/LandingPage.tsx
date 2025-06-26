@@ -17,6 +17,139 @@ import {
 import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
 import { submitContactForm } from '../api';
 
+// Video Modal Component
+interface VideoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  videoUrl: string;
+}
+
+const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Handle escape key press
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      setIsLoading(true);
+      setHasError(false);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      onClick={onClose} // Close when clicking backdrop
+    >
+      <div 
+        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fade-in-up"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal content
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-all duration-200"
+          aria-label="Close video modal"
+        >
+          <X size={20} />
+        </button>
+        
+        {/* Video container */}
+        <div className="relative bg-black rounded-t-2xl overflow-hidden">
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="flex flex-col items-center text-white">
+                <Loader className="w-8 h-8 animate-spin mb-3" />
+                <p className="text-sm">Loading demo video...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {hasError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="flex flex-col items-center text-white text-center p-8">
+                <X className="w-8 h-8 mb-3 text-red-400" />
+                <h3 className="text-lg font-semibold mb-2">Video Unavailable</h3>
+                <p className="text-sm text-gray-300 mb-4">
+                  The demo video couldn't be loaded. Please make sure the video file is placed in the public folder.
+                </p>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* No Audio Indicator */}
+          {!isLoading && !hasError && (
+            <div className="absolute top-4 left-4 z-10">
+              <div className="bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clipRule="evenodd" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                </svg>
+                <span>No Audio</span>
+              </div>
+            </div>
+          )}
+
+          <video
+            className="w-full h-auto max-h-[80vh] object-contain"
+            controls
+            autoPlay
+            muted
+            preload="metadata"
+            onLoadedData={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+            poster="/demo-thumbnail.jpg" // Optional: add a thumbnail
+          >
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        
+        {/* Video info */}
+        <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            MCP Observability Platform Demo
+          </h3>
+          <p className="text-gray-600 text-sm">
+            See how easy it is to monitor your MCP tools, debug issues with stack traces, 
+            and replay failed requests to understand what went wrong.
+          </p>
+          <div className="mt-3 flex items-center text-xs text-gray-500">
+            <span className="bg-gray-200 px-2 py-1 rounded-md mr-2">Duration: 1:44</span>
+            <span>HD Quality</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface LandingPageProps {
   onGetStarted: () => void;
 }
@@ -25,7 +158,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const { isSignedIn } = useAuth();
+  
+  // INSTRUCTIONS: Place your demo video file in the frontend/public/ folder 
+  // and update this URL to match your filename (e.g., "/my-demo-video.mp4")
+  const demoVideoUrl = "/demo-video.mp4";
   
   // Contact form state
   const [formData, setFormData] = useState({
@@ -276,7 +414,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                       <ArrowRight size={20} />
                     </button>
                   )}
-                  <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2">
+                  <button 
+                    onClick={() => setShowVideoModal(true)}
+                    className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2 hover:bg-gray-50"
+                  >
                     <Play size={20} />
                     <span>Watch Demo</span>
                   </button>
@@ -645,6 +786,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           </div>
         </div>
       </footer>
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        videoUrl={demoVideoUrl}
+      />
     </div>
   );
 };
