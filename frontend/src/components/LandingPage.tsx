@@ -11,9 +11,144 @@ import {
   Star,
   Menu,
   X,
-  Play
+  Play,
+  Loader
 } from 'lucide-react';
 import { SignIn, SignUp, useAuth } from '@clerk/clerk-react';
+import { submitContactForm } from '../api';
+
+// Video Modal Component
+interface VideoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  videoUrl: string;
+}
+
+const VideoModal: React.FC<VideoModalProps> = ({ isOpen, onClose, videoUrl }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Handle escape key press
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      setIsLoading(true);
+      setHasError(false);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+      onClick={onClose} // Close when clicking backdrop
+    >
+      <div 
+        className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden animate-fade-in-up"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking modal content
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-70 transition-all duration-200"
+          aria-label="Close video modal"
+        >
+          <X size={20} />
+        </button>
+        
+        {/* Video container */}
+        <div className="relative bg-black rounded-t-2xl overflow-hidden">
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="flex flex-col items-center text-white">
+                <Loader className="w-8 h-8 animate-spin mb-3" />
+                <p className="text-sm">Loading demo video...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {hasError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="flex flex-col items-center text-white text-center p-8">
+                <X className="w-8 h-8 mb-3 text-red-400" />
+                <h3 className="text-lg font-semibold mb-2">Video Unavailable</h3>
+                <p className="text-sm text-gray-300 mb-4">
+                  The demo video couldn't be loaded. Please make sure the video file is placed in the public folder.
+                </p>
+                <button
+                  onClick={onClose}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* No Audio Indicator */}
+          {!isLoading && !hasError && (
+            <div className="absolute top-4 left-4 z-10">
+              <div className="bg-black bg-opacity-70 text-white px-3 py-2 rounded-lg flex items-center space-x-2 text-sm">
+                <svg className="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clipRule="evenodd" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                </svg>
+                <span>No Audio</span>
+              </div>
+            </div>
+          )}
+
+          <video
+            className="w-full h-auto max-h-[80vh] object-contain"
+            controls
+            autoPlay
+            muted
+            preload="metadata"
+            onLoadedData={() => setIsLoading(false)}
+            onError={() => {
+              setIsLoading(false);
+              setHasError(true);
+            }}
+            poster="/demo-thumbnail.jpg" // Optional: add a thumbnail
+          >
+            <source src={videoUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        
+        {/* Video info */}
+        <div className="p-6 bg-gradient-to-r from-blue-50 to-purple-50">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            MCP Observability Platform Demo
+          </h3>
+          <p className="text-gray-600 text-sm">
+            See how easy it is to monitor your MCP tools, debug issues with stack traces, 
+            and replay failed requests to understand what went wrong.
+          </p>
+          <div className="mt-3 flex items-center text-xs text-gray-500">
+            <span className="bg-gray-200 px-2 py-1 rounded-md mr-2">Duration: 1:44</span>
+            <span>HD Quality</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -23,52 +158,100 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const [showAuth, setShowAuth] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signup');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const { isSignedIn } = useAuth();
+  
+  // INSTRUCTIONS: Place your demo video file in the frontend/public/ folder 
+  // and update this URL to match your filename (e.g., "/my-demo-video.mp4")
+  const demoVideoUrl = "/demo-video.mp4";
+  
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    interest: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email) {
+      setErrorMessage('Please fill in all required fields.');
+      setSubmitStatus('error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
+
+    try {
+      await submitContactForm(formData);
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', interest: '' });
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus('error');
+      setErrorMessage('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const features = [
     {
       icon: Activity,
-      title: "Real-time Trace Monitoring",
-      description: "Monitor your MCP tool executions in real-time with detailed traces and execution context.",
+      title: "Stack Trace Inspection",
+      description: "Debug your MCP tools with detailed stack traces and execution context when things go wrong.",
       color: "from-blue-500 to-blue-600"
     },
     {
       icon: BarChart3,
-      title: "Advanced Analytics",
-      description: "Get insights into tool performance, success rates, and usage patterns with beautiful dashboards.",
+      title: "Success Rate & Throughput",
+      description: "Track the basics that matter: how often your tools succeed and how fast they respond.",
       color: "from-green-500 to-green-600"
     },
     {
       icon: Zap,
-      title: "Performance Optimization",
-      description: "Identify bottlenecks and optimize your MCP tool performance with detailed metrics.",
+      title: "Request Replay",
+      description: "Replay failed requests to understand what went wrong and test your fixes.",
       color: "from-yellow-500 to-yellow-600"
     },
     {
       icon: Shield,
-      title: "Secure API Keys",
-      description: "Manage your API keys securely with usage tracking and access controls.",
+      title: "Simple Filtering",
+      description: "Filter through your traces by success/failure, tool name, or time period.",
       color: "from-purple-500 to-purple-600"
     },
     {
       icon: Globe,
-      title: "Multi-tenant Architecture",
-      description: "Isolated environments for teams with role-based access and data segregation.",
+      title: "Easy Onboarding",
+      description: "Get started quickly with minimal setup - we know your time is valuable.",
       color: "from-indigo-500 to-indigo-600"
     },
     {
       icon: Rocket,
-      title: "Easy Integration",
-      description: "Simple SDK integration with Python and TypeScript for seamless observability.",
+      title: "Python SDK (Ready)",
+      description: "Drop-in Python SDK that just works. TypeScript coming soon based on your feedback.",
       color: "from-pink-500 to-pink-600"
     }
   ];
 
   const stats = [
-    { label: "API Calls Monitored", value: "10M+", suffix: "" },
-    { label: "Tools Analyzed", value: "500", suffix: "+" },
-    { label: "Uptime", value: "99.9", suffix: "%" },
-    { label: "Response Time", value: "<50", suffix: "ms" }
+    { label: "Building for Early Adopters", value: "", suffix: "" },
+    { label: "Community Driven Development", value: "", suffix: "" },
+    { label: "Your Feedback Needed", value: "", suffix: "" }
   ];
 
   if (showAuth && !isSignedIn) {
@@ -141,7 +324,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
               <a href="#sdk" className="text-gray-600 hover:text-gray-900 transition-colors">SDK</a>
-              <a href="#docs" className="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
               {isSignedIn ? (
                 <a
                   href="/app"
@@ -154,7 +336,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   onClick={() => setShowAuth(true)}
                   className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                 >
-                  Get Started
+                  Try Demo
                 </button>
               )}
             </div>
@@ -175,7 +357,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="px-4 py-4 space-y-2">
               <a href="#features" className="block py-2 text-gray-600 hover:text-gray-900">Features</a>
               <a href="#sdk" className="block py-2 text-gray-600 hover:text-gray-900">SDK</a>
-              <a href="#docs" className="block py-2 text-gray-600 hover:text-gray-900">Docs</a>
               {isSignedIn ? (
                 <a
                   href="/app"
@@ -184,12 +365,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   Go to Dashboard
                 </a>
               ) : (
-                <button
-                  onClick={() => setShowAuth(true)}
-                  className="w-full mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg font-medium"
-                >
-                  Get Started
-                </button>
+                                  <button
+                    onClick={() => setShowAuth(true)}
+                    className="w-full mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg font-medium"
+                  >
+                    Try Demo
+                  </button>
               )}
             </div>
           </div>
@@ -204,13 +385,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="text-center lg:text-left">
               <div className="animate-fade-in-up">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
-                  Monitor Your
+                  MCP Observability
                   <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                    {" "}MCP Tools
+                    {" "}Built by Developers
                   </span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl lg:max-w-none">
-                  Real-time observability, analytics, and performance monitoring for your Model Context Protocol integrations.
+                  We were building an MCP server and ran into reliability issues and slow response times. This led us to create an observability platform we actually wanted to use. We see a future in a platform that can expand and deliver more insights—we hope you do too!
                 </p>
               </div>
               
@@ -229,11 +410,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                       onClick={() => setShowAuth(true)}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
                     >
-                      <span>Start Free Trial</span>
+                      <span>Try the Demo</span>
                       <ArrowRight size={20} />
                     </button>
                   )}
-                  <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2">
+                  <button 
+                    onClick={() => setShowVideoModal(true)}
+                    className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:border-gray-400 transition-all duration-200 flex items-center justify-center space-x-2 hover:bg-gray-50"
+                  >
                     <Play size={20} />
                     <span>Watch Demo</span>
                   </button>
@@ -241,13 +425,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </div>
 
               {/* Stats */}
-              <div className="animate-fade-in-up animation-delay-400 grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="animate-fade-in-up animation-delay-400 grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center lg:text-left">
-                    <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-                      {stat.value}{stat.suffix}
+                    <div className="text-base font-medium text-gray-700 px-3 py-2 bg-gray-100 rounded-lg">
+                      {stat.label}
                     </div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -258,26 +441,24 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    Stay Updated
+                    Join the Early Wave
                   </h3>
                   <p className="text-gray-600">
-                    Get early access to new features & SDKs
+                    Help us build the observability platform MCP developers actually want
                   </p>
                 </div>
                 
-                <form 
-                  action="mailto:etalesystemsteam@gmail.com" 
-                  method="post" 
-                  encType="text/plain"
-                  className="space-y-4"
-                >
+                <form onSubmit={handleFormSubmit} className="space-y-4">
                   <div>
                     <input
                       type="text"
                       name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       placeholder="Full Name"
+                      disabled={isSubmitting}
                     />
                   </div>
                   
@@ -285,16 +466,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     <input
                       type="email"
                       name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                       placeholder="Email Address"
+                      disabled={isSubmitting}
                     />
                   </div>
                   
                   <div>
                     <select
                       name="interest"
+                      value={formData.interest}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      disabled={isSubmitting}
                     >
                       <option value="">What interests you most?</option>
                       <option value="typescript-sdk">TypeScript SDK Release</option>
@@ -305,11 +492,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                     </select>
                   </div>
                   
+                  {submitStatus === 'error' && errorMessage && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-600 text-sm">{errorMessage}</p>
+                    </div>
+                  )}
+                  
+                  {submitStatus === 'success' && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-green-600 text-sm flex items-center">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Thank you for your interest! We'll be in touch soon.
+                      </p>
+                    </div>
+                  )}
+                  
                   <button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center"
                   >
-                    Join Our Community
+                    {isSubmitting ? (
+                      <>
+                        <Loader className="w-4 h-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      'Join Waitlist'
+                    )}
                   </button>
                   
                   <p className="text-xs text-gray-500 text-center">
@@ -327,13 +537,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Everything you need to monitor
+              What we're building
               <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                {" "}MCP tools
+                {" "}for MCP developers
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive observability platform built specifically for Model Context Protocol integrations.
+              The platform currently focuses on ease of onboarding and captures the essentials: stack trace inspection, success rates, throughput, replay, and filtering. We're building this with early MCP developers like you.
             </p>
           </div>
 
@@ -353,6 +563,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 </div>
               );
             })}
+          </div>
+          
+          {/* Getting Started Steps */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Get started in 3 steps</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">1</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Sign Up & Get API Key</h4>
+                <p className="text-gray-600">Create your account and grab your API key from the dashboard</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">2</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Install Python SDK</h4>
+                <p className="text-gray-600">pip install mcp-observability and wrap your tools</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">3</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Start Debugging</h4>
+                <p className="text-gray-600">See stack traces, success rates, and replay failed requests</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -395,17 +627,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 
                 <div className="bg-gray-900 rounded-lg p-4 text-sm font-mono">
                   <div className="text-green-400 mb-2"># Quick Start</div>
-                  <div className="text-white">
-                    <div className="text-blue-300">from</div> mcp_observability <div className="text-blue-300">import</div> MCPObservability<br/>
-                    <br/>
-                    obs = MCPObservability(<br/>
-                    &nbsp;&nbsp;api_url=<div className="text-orange-300">"https://etalesystems.com/api"</div>,<br/>
-                    &nbsp;&nbsp;api_key=<div className="text-orange-300">"your_api_key"</div><br/>
-                    )<br/>
-                    <br/>
-                    <div className="text-yellow-300">@mcp.tool()</div><br/>
-                    <div className="text-yellow-300">@obs.tool_observer("my_tool")</div><br/>
-                    <div className="text-blue-300">def</div> my_tool():
+                  <div className="text-white space-y-1">
+                    <div><span className="text-purple-400">from</span> <span className="text-white">mcp_observability</span> <span className="text-purple-400">import</span> <span className="text-yellow-300">MCPObservability</span></div>
+                    <div className="h-3"></div>
+                    <div><span className="text-white">obs</span> <span className="text-purple-400">=</span> <span className="text-yellow-300">MCPObservability</span><span className="text-white">(</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-300">api_url</span><span className="text-purple-400">=</span><span className="text-green-300">"https://etalesystems.com/api"</span><span className="text-white">,</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-300">api_key</span><span className="text-purple-400">=</span><span className="text-green-300">"your_api_key"</span></div>
+                    <div><span className="text-white">)</span></div>
+                    <div className="h-3"></div>
+                    <div><span className="text-yellow-300">@mcp.tool()</span></div>
+                    <div className="bg-blue-900/30 px-2 py-1 rounded border-l-4 border-blue-400">
+                      <span className="text-yellow-300 font-semibold">@obs.tool_observer("my_tool")</span>
+                      <span className="text-blue-200 text-xs ml-2">← Just add this line!</span>
+                    </div>
+                    <div><span className="text-purple-400">def</span> <span className="text-blue-300">my_tool</span><span className="text-white">():</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-400"># Your tool logic here</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> <span className="text-green-300">"success"</span></div>
                   </div>
                 </div>
                 
@@ -489,27 +726,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
              </div>
           </div>
 
-          {/* Getting Started Steps */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Get started in 3 steps</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">1</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Create API Key</h4>
-                <p className="text-gray-600">Sign up and generate your API key from the dashboard</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">2</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Install SDK</h4>
-                <p className="text-gray-600">Choose Python or TypeScript and install with one command</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">3</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Add Observability</h4>
-                <p className="text-gray-600">Wrap your tools and start monitoring immediately</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -517,10 +734,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to get started?
+            Ready to help us build this?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of developers monitoring their MCP tools with our platform.
+            Check out the demo and let us know what features you'd like to see. Your feedback shapes what we build next.
           </p>
           {isSignedIn ? (
             <a
@@ -535,7 +752,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               onClick={() => setShowAuth(true)}
               className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center space-x-2"
             >
-              <span>Start Free Trial</span>
+              <span>Try the Demo</span>
               <ArrowRight size={20} />
             </button>
           )}
@@ -557,13 +774,25 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <p className="text-gray-400 mb-4">
             Built with ❤️ for the MCP community
           </p>
-          <div className="flex justify-center space-x-6 text-sm text-gray-400">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <div className="flex flex-col items-center space-y-4">
+            <a href="mailto:etalesystemsteam@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">
+              etalesystemsteam@gmail.com
+            </a>
+            <div className="flex justify-center space-x-6 text-sm text-gray-400">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="mailto:etalesystemsteam@gmail.com" className="hover:text-white transition-colors">Contact</a>
+            </div>
           </div>
         </div>
       </footer>
+
+      {/* Video Modal */}
+      <VideoModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+        videoUrl={demoVideoUrl}
+      />
     </div>
   );
 };
