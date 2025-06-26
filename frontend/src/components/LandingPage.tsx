@@ -74,47 +74,46 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   const features = [
     {
       icon: Activity,
-      title: "Real-time Trace Monitoring",
-      description: "Monitor your MCP tool executions in real-time with detailed traces and execution context.",
+      title: "Stack Trace Inspection",
+      description: "Debug your MCP tools with detailed stack traces and execution context when things go wrong.",
       color: "from-blue-500 to-blue-600"
     },
     {
       icon: BarChart3,
-      title: "Advanced Analytics",
-      description: "Get insights into tool performance, success rates, and usage patterns with beautiful dashboards.",
+      title: "Success Rate & Throughput",
+      description: "Track the basics that matter: how often your tools succeed and how fast they respond.",
       color: "from-green-500 to-green-600"
     },
     {
       icon: Zap,
-      title: "Performance Optimization",
-      description: "Identify bottlenecks and optimize your MCP tool performance with detailed metrics.",
+      title: "Request Replay",
+      description: "Replay failed requests to understand what went wrong and test your fixes.",
       color: "from-yellow-500 to-yellow-600"
     },
     {
       icon: Shield,
-      title: "Secure API Keys",
-      description: "Manage your API keys securely with usage tracking and access controls.",
+      title: "Simple Filtering",
+      description: "Filter through your traces by success/failure, tool name, or time period.",
       color: "from-purple-500 to-purple-600"
     },
     {
       icon: Globe,
-      title: "Multi-tenant Architecture",
-      description: "Isolated environments for teams with role-based access and data segregation.",
+      title: "Easy Onboarding",
+      description: "Get started quickly with minimal setup - we know your time is valuable.",
       color: "from-indigo-500 to-indigo-600"
     },
     {
       icon: Rocket,
-      title: "Easy Integration",
-      description: "Simple SDK integration with Python and TypeScript for seamless observability.",
+      title: "Python SDK (Ready)",
+      description: "Drop-in Python SDK that just works. TypeScript coming soon based on your feedback.",
       color: "from-pink-500 to-pink-600"
     }
   ];
 
   const stats = [
-    { label: "API Calls Monitored", value: "10M+", suffix: "" },
-    { label: "Tools Analyzed", value: "500", suffix: "+" },
-    { label: "Uptime", value: "99.9", suffix: "%" },
-    { label: "Response Time", value: "<50", suffix: "ms" }
+    { label: "Building for Early Adopters", value: "", suffix: "" },
+    { label: "Community Driven Development", value: "", suffix: "" },
+    { label: "Your Feedback Needed", value: "", suffix: "" }
   ];
 
   if (showAuth && !isSignedIn) {
@@ -187,7 +186,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
               <a href="#sdk" className="text-gray-600 hover:text-gray-900 transition-colors">SDK</a>
-              <a href="#docs" className="text-gray-600 hover:text-gray-900 transition-colors">Docs</a>
               {isSignedIn ? (
                 <a
                   href="/app"
@@ -200,7 +198,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   onClick={() => setShowAuth(true)}
                   className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                 >
-                  Get Started
+                  Try Demo
                 </button>
               )}
             </div>
@@ -221,7 +219,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="px-4 py-4 space-y-2">
               <a href="#features" className="block py-2 text-gray-600 hover:text-gray-900">Features</a>
               <a href="#sdk" className="block py-2 text-gray-600 hover:text-gray-900">SDK</a>
-              <a href="#docs" className="block py-2 text-gray-600 hover:text-gray-900">Docs</a>
               {isSignedIn ? (
                 <a
                   href="/app"
@@ -230,12 +227,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                   Go to Dashboard
                 </a>
               ) : (
-                <button
-                  onClick={() => setShowAuth(true)}
-                  className="w-full mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg font-medium"
-                >
-                  Get Started
-                </button>
+                                  <button
+                    onClick={() => setShowAuth(true)}
+                    className="w-full mt-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg font-medium"
+                  >
+                    Try Demo
+                  </button>
               )}
             </div>
           </div>
@@ -250,13 +247,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             <div className="text-center lg:text-left">
               <div className="animate-fade-in-up">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6">
-                  Monitor Your
+                  MCP Observability
                   <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                    {" "}MCP Tools
+                    {" "}Built by Developers
                   </span>
                 </h1>
                 <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl lg:max-w-none">
-                  Real-time observability, analytics, and performance monitoring for your Model Context Protocol integrations.
+                  We were building an MCP server and ran into reliability issues and slow response times. This led us to create an observability platform we actually wanted to use. We see a future in a platform that can expand and deliver more insights—we hope you do too!
                 </p>
               </div>
               
@@ -275,7 +272,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                       onClick={() => setShowAuth(true)}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
                     >
-                      <span>Start Free Trial</span>
+                      <span>Try the Demo</span>
                       <ArrowRight size={20} />
                     </button>
                   )}
@@ -287,13 +284,12 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               </div>
 
               {/* Stats */}
-              <div className="animate-fade-in-up animation-delay-400 grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="animate-fade-in-up animation-delay-400 grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center lg:text-left">
-                    <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-                      {stat.value}{stat.suffix}
+                    <div className="text-base font-medium text-gray-700 px-3 py-2 bg-gray-100 rounded-lg">
+                      {stat.label}
                     </div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -304,10 +300,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
                 <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    Stay Updated
+                    Join the Early Wave
                   </h3>
                   <p className="text-gray-600">
-                    Get early access to new features & SDKs
+                    Help us build the observability platform MCP developers actually want
                   </p>
                 </div>
                 
@@ -381,7 +377,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                         Submitting...
                       </>
                     ) : (
-                      'Join Our Community'
+                      'Join Waitlist'
                     )}
                   </button>
                   
@@ -400,13 +396,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Everything you need to monitor
+              What we're building
               <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                {" "}MCP tools
+                {" "}for MCP developers
               </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Comprehensive observability platform built specifically for Model Context Protocol integrations.
+              The platform currently focuses on ease of onboarding and captures the essentials: stack trace inspection, success rates, throughput, replay, and filtering. We're building this with early MCP developers like you.
             </p>
           </div>
 
@@ -426,6 +422,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 </div>
               );
             })}
+          </div>
+          
+          {/* Getting Started Steps */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Get started in 3 steps</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">1</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Sign Up & Get API Key</h4>
+                <p className="text-gray-600">Create your account and grab your API key from the dashboard</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">2</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Install Python SDK</h4>
+                <p className="text-gray-600">pip install mcp-observability and wrap your tools</p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">3</div>
+                <h4 className="font-semibold text-gray-900 mb-2">Start Debugging</h4>
+                <p className="text-gray-600">See stack traces, success rates, and replay failed requests</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -468,17 +486,22 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 
                 <div className="bg-gray-900 rounded-lg p-4 text-sm font-mono">
                   <div className="text-green-400 mb-2"># Quick Start</div>
-                  <div className="text-white">
-                    <div className="text-blue-300">from</div> mcp_observability <div className="text-blue-300">import</div> MCPObservability<br/>
-                    <br/>
-                    obs = MCPObservability(<br/>
-                    &nbsp;&nbsp;api_url=<div className="text-orange-300">"https://etalesystems.com/api"</div>,<br/>
-                    &nbsp;&nbsp;api_key=<div className="text-orange-300">"your_api_key"</div><br/>
-                    )<br/>
-                    <br/>
-                    <div className="text-yellow-300">@mcp.tool()</div><br/>
-                    <div className="text-yellow-300">@obs.tool_observer("my_tool")</div><br/>
-                    <div className="text-blue-300">def</div> my_tool():
+                  <div className="text-white space-y-1">
+                    <div><span className="text-purple-400">from</span> <span className="text-white">mcp_observability</span> <span className="text-purple-400">import</span> <span className="text-yellow-300">MCPObservability</span></div>
+                    <div className="h-3"></div>
+                    <div><span className="text-white">obs</span> <span className="text-purple-400">=</span> <span className="text-yellow-300">MCPObservability</span><span className="text-white">(</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-300">api_url</span><span className="text-purple-400">=</span><span className="text-green-300">"https://etalesystems.com/api"</span><span className="text-white">,</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-blue-300">api_key</span><span className="text-purple-400">=</span><span className="text-green-300">"your_api_key"</span></div>
+                    <div><span className="text-white">)</span></div>
+                    <div className="h-3"></div>
+                    <div><span className="text-yellow-300">@mcp.tool()</span></div>
+                    <div className="bg-blue-900/30 px-2 py-1 rounded border-l-4 border-blue-400">
+                      <span className="text-yellow-300 font-semibold">@obs.tool_observer("my_tool")</span>
+                      <span className="text-blue-200 text-xs ml-2">← Just add this line!</span>
+                    </div>
+                    <div><span className="text-purple-400">def</span> <span className="text-blue-300">my_tool</span><span className="text-white">():</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-gray-400"># Your tool logic here</span></div>
+                    <div>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-purple-400">return</span> <span className="text-green-300">"success"</span></div>
                   </div>
                 </div>
                 
@@ -562,27 +585,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
              </div>
           </div>
 
-          {/* Getting Started Steps */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-gray-900 text-center mb-8">Get started in 3 steps</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">1</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Create API Key</h4>
-                <p className="text-gray-600">Sign up and generate your API key from the dashboard</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">2</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Install SDK</h4>
-                <p className="text-gray-600">Choose Python or TypeScript and install with one command</p>
-              </div>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-lg">3</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Add Observability</h4>
-                <p className="text-gray-600">Wrap your tools and start monitoring immediately</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </section>
 
@@ -590,10 +593,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-purple-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to get started?
+            Ready to help us build this?
           </h2>
           <p className="text-xl text-blue-100 mb-8">
-            Join thousands of developers monitoring their MCP tools with our platform.
+            Check out the demo and let us know what features you'd like to see. Your feedback shapes what we build next.
           </p>
           {isSignedIn ? (
             <a
@@ -608,7 +611,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
               onClick={() => setShowAuth(true)}
               className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center space-x-2"
             >
-              <span>Start Free Trial</span>
+              <span>Try the Demo</span>
               <ArrowRight size={20} />
             </button>
           )}
@@ -630,10 +633,15 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <p className="text-gray-400 mb-4">
             Built with ❤️ for the MCP community
           </p>
-          <div className="flex justify-center space-x-6 text-sm text-gray-400">
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          <div className="flex flex-col items-center space-y-4">
+            <a href="mailto:etalesystemsteam@gmail.com" className="text-blue-400 hover:text-blue-300 transition-colors">
+              etalesystemsteam@gmail.com
+            </a>
+            <div className="flex justify-center space-x-6 text-sm text-gray-400">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="mailto:etalesystemsteam@gmail.com" className="hover:text-white transition-colors">Contact</a>
+            </div>
           </div>
         </div>
       </footer>
